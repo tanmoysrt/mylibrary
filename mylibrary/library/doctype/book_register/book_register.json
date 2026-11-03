@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "autoname": "LIB-REG-.YYYY.-.#####",
+ "creation": "2026-11-03 14:02:51.730114",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "book",
+  "book_title",
+  "author",
+  "isbn",
+  "column_break_m2xa",
+  "member",
+  "member_name",
+  "member_email",
+  "section_break_loan",
+  "issue_date",
+  "due_date",
+  "column_break_r7ke",
+  "returned_on",
+  "email_status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "book",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Book",
+   "options": "Book",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "book.title",
+   "fieldname": "book_title",
+   "fieldtype": "Data",
+   "label": "Book Title",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "book.author",
+   "fieldname": "author",
+   "fieldtype": "Data",
+   "label": "Author",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "book.isbn",
+   "fieldname": "isbn",
+   "fieldtype": "Data",
+   "label": "ISBN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_m2xa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "member",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Member",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "member.full_name",
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "label": "Member Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "member.email",
+   "fieldname": "member_email",
+   "fieldtype": "Data",
+   "label": "Member Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_loan",
+   "fieldtype": "Section Break",
+   "label": "Loan"
+  },
+  {
+   "default": "Today",
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Issue Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "column_break_r7ke",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "returned_on",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Returned On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Not Sent",
+   "fieldname": "email_status",
+   "fieldtype": "Select",
+   "label": "Email Status",
+   "no_copy": 1,
+   "options": "Not Sent\nSent\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Book Register",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-03 14:02:51.730114",
+ "modified_by": "Administrator",
+ "module": "Library",
+ "name": "Book Register",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Librarian",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "book_title",
+ "track_changes": 1
+}
