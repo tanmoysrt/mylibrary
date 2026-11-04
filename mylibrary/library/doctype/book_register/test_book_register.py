@@ -43,6 +43,13 @@ class IntegrationTestBookRegister(IntegrationTestCase):
 		register.cancel()
 		self.assertEqual(available(self.book), 2)
 
+	def test_cancel_after_return_does_not_restore_again(self):
+		register = make_register(self.book)
+		register.mark_returned()
+		register.reload()
+		register.cancel()
+		self.assertEqual(available(self.book), 2)
+
 	def test_due_date_defaults_to_loan_period(self):
 		register = make_register(self.book, submit=False)
 		self.assertTrue(register.due_date)

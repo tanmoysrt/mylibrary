@@ -23,7 +23,8 @@ class BookRegister(Document):
 		frappe.db.set_value("Book", self.book, "available_copies", available - 1)
 
 	def on_cancel(self):
-		restore_copy(self.book)
+		if not self.returned_on:
+			restore_copy(self.book)
 
 	@frappe.whitelist()
 	def mark_returned(self):
