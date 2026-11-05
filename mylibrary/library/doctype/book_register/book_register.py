@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
+from mylibrary.notifications import send_issue_email
+
 LOAN_DAYS = 14
 
 
@@ -21,6 +23,8 @@ class BookRegister(Document):
 		if available < 1:
 			frappe.throw(_("No copies of {0} are available").format(self.book_title or self.book))
 		frappe.db.set_value("Book", self.book, "available_copies", available - 1)
+		if self.member_email:
+			send_issue_email(self)
 
 	def on_cancel(self):
 		if not self.returned_on:
