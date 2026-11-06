@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Tanmoy Sarkar and contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests import IntegrationTestCase
 
@@ -21,10 +23,14 @@ def available(book):
 class IntegrationTestBookRegister(IntegrationTestCase):
 	def setUp(self):
 		self.book = make_book(isbn="9781861972712", total_copies=2)
+		mail = patch("mylibrary.library.doctype.book_register.book_register.send_issue_email")
+		self.send_issue_email = mail.start()
+		self.addCleanup(mail.stop)
 
 	def test_submit_issues_one_copy(self):
 		make_register(self.book)
 		self.assertEqual(available(self.book), 1)
+		self.send_issue_email.assert_called_once()
 
 	def test_cannot_issue_unavailable_book(self):
 		make_register(self.book)

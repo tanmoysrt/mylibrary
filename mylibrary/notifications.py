@@ -1,12 +1,15 @@
 import logging
 import smtplib
+import time
 from email.message import EmailMessage
 
 import frappe
 from frappe.utils import formatdate
 
 DEFAULT_RELAY = "127.0.0.1:2525"
-SMTP_TIMEOUT = 10
+SMTP_TIMEOUT = 2.5
+MAX_ATTEMPTS = 10
+RETRY_DELAY = 0.5
 
 
 def get_logger() -> logging.Logger:
@@ -37,12 +40,17 @@ def build_issue_message(register) -> EmailMessage:
 def send_issue_email(register):
 	logger = get_logger()
 	host, port = get_mail_relay()
-	try:
-		with smtplib.SMTP(host, port, timeout=SMTP_TIMEOUT) as smtp:
-			smtp.send_message(build_issue_message(register))
-	except (OSError, smtplib.SMTPException) as error:
-		logger.warning(f"{register.name}: delivery to {host}:{port} failed: {error!r}")
-		register.db_set("email_status", "Failed")
+	message = build_issue_message(register)
+	for attempt in range(1, MAX_ATTEMPTS + 1):
+		try:
+			with smtplib.SMTP(host, port, timeout=SMTP_TIMEOUT) as smtp:
+				smtp.send_message(message)
+		except (OSError, smtplib.SMTPException) as error:
+			logger.warning(f"{register.name}: attempt {attempt}/{MAX_ATTEMPTS} to {host}:{port} failed: {error!r}")
+			time.sleep(RETRY_DELAY)
+			continue
+		logger.info(f"{register.name}: issue email sent to {register.member_email} on attempt {attempt}")
+		register.db_set("email_status", "Sent")
 		return
-	logger.info(f"{register.name}: issue email sent to {register.member_email}")
-	register.db_set("email_status", "Sent")
+	logger.error(f"{register.name}: giving up on issue email after {MAX_ATTEMPTS} attempts")
+	register.db_set("email_status", "Failed")
