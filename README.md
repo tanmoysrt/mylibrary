@@ -6,6 +6,7 @@ Library catalog and circulation for Frappe.
 
 - **Book**: title, author, ISBN-13 (unique), total and available copies.
 - **Book Register**: issue one copy of a book to a member. Submitting issues the copy; returning or cancelling puts it back exactly once.
+- **Catalog** (`/catalog`): librarians look up a book by its exact ISBN, or by author name from its first letters (e.g. `Agat` finds Agatha Christie). Results are sorted by author, then title, 20 per page.
 
 ### Install
 

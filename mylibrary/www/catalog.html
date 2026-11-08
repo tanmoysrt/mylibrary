@@ -1,0 +1,94 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="catalog">
+	<h1>Catalog</h1>
+	<form id="catalog-search" class="catalog-search">
+		<select name="search_by" class="form-control">
+			<option value="author">Author</option>
+			<option value="isbn">ISBN</option>
+		</select>
+		<input name="query" class="form-control" placeholder="Author name or ISBN" autocomplete="off" required>
+		<button type="submit" class="btn btn-primary">Search</button>
+	</form>
+	<p id="catalog-status" class="text-muted"></p>
+	<table class="table" id="catalog-results" hidden>
+		<thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th></tr></thead>
+		<tbody></tbody>
+	</table>
+	<div class="catalog-pager" hidden>
+		<button type="button" class="btn btn-default" data-step="-1">Previous</button>
+		<button type="button" class="btn btn-default" data-step="1">Next</button>
+	</div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+	.catalog { max-width: 960px; margin: 2rem auto; }
+	.catalog-search { display: flex; gap: .5rem; margin: 1rem 0; }
+	.catalog-search select { max-width: 9rem; }
+	.catalog-pager { display: flex; gap: .5rem; }
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+(() => {
+	const PAGE_LENGTH = 20;
+	const form = document.getElementById("catalog-search");
+	const status = document.getElementById("catalog-status");
+	const table = document.getElementById("catalog-results");
+	const pager = document.querySelector(".catalog-pager");
+	let page = 1;
+	let total = 0;
+
+	const cell = (text) => {
+		const td = document.createElement("td");
+		td.textContent = text;
+		return td;
+	};
+
+	async function search() {
+		const params = new URLSearchParams(new FormData(form));
+		params.set("page", page);
+		params.set("page_length", PAGE_LENGTH);
+		status.textContent = "Searching…";
+		const response = await fetch(`/api/method/mylibrary.api.search_books?${params}`);
+		if (!response.ok) {
+			status.textContent = `Search failed (${response.status})`;
+			return;
+		}
+		const { message } = await response.json();
+		total = message.total;
+		const rows = message.results.map((book) => {
+			const tr = document.createElement("tr");
+			const title = document.createElement("a");
+			title.href = `/app/book/${encodeURIComponent(book.name)}`;
+			title.textContent = book.title;
+			const titleCell = document.createElement("td");
+			titleCell.append(title);
+			tr.append(titleCell, cell(book.author), cell(book.isbn), cell(`${book.available_copies} / ${book.total_copies}`));
+			return tr;
+		});
+		table.tBodies[0].replaceChildren(...rows);
+		table.hidden = rows.length === 0;
+		pager.hidden = total <= PAGE_LENGTH;
+		status.textContent = total ? `${total} books, page ${page} of ${Math.ceil(total / PAGE_LENGTH)}` : "No books found";
+	}
+
+	form.addEventListener("submit", (event) => {
+		event.preventDefault();
+		page = 1;
+		search();
+	});
+	pager.addEventListener("click", (event) => {
+		const step = Number(event.target.dataset.step || 0);
+		const next = page + step;
+		if (!step || next < 1 || (next - 1) * PAGE_LENGTH >= total) return;
+		page = next;
+		search();
+	});
+})();
+</script>
+{% endblock %}
