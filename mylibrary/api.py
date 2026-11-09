@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, today
 
 SEARCH_FIELDS = {"isbn": "isbn", "author": "author"}
 MAX_PAGE_LENGTH = 100
@@ -34,3 +34,40 @@ def search_books(query: str, search_by: str = "author", page: int = 1, page_leng
 			for book in books[start : start + page_length]
 		],
 	}
+
+
+@frappe.whitelist()
+def get_circulation_summary() -> dict:
+	frappe.has_permission("Book Register", "read", throw=True)
+	values = {"today": today()}
+	totals = frappe.db.sql(
+		"""
+		select
+			count(*) as on_loan,
+			coalesce(sum(due_date < %(today)s), 0) as overdue
+		from `tabBook Register`
+		where docstatus = 1 and returned_on is null
+		""",
+		values,
+		as_dict=True,
+	)[0]
+	top_overdue = frappe.db.sql(
+		"""
+		select member, member_name, overdue from (
+			select r.member, r.member_name, (
+				select count(*) from `tabBook Register` o
+				where o.member = r.member and o.docstatus = 1
+					and o.returned_on is null and o.due_date < %(today)s
+			) as overdue
+			from `tabBook Register` r
+			where r.docstatus = 1 and r.returned_on is null
+		) loans
+		where overdue > 0
+		group by member, member_name, overdue
+		order by overdue desc, member_name
+		limit 5
+		""",
+		values,
+		as_dict=True,
+	)
+	return {**totals, "top_overdue": top_overdue}

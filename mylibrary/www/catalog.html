@@ -3,6 +3,11 @@
 {% block page_content %}
 <div class="catalog">
 	<h1>Catalog</h1>
+	<div class="circulation" id="circulation">
+		<div><span class="circulation-value" data-key="on_loan">–</span> on loan</div>
+		<div><span class="circulation-value" data-key="overdue">–</span> overdue</div>
+		<div class="circulation-members text-muted"></div>
+	</div>
 	<form id="catalog-search" class="catalog-search">
 		<select name="search_by" class="form-control">
 			<option value="author">Author</option>
@@ -29,6 +34,8 @@
 	.catalog-search { display: flex; gap: .5rem; margin: 1rem 0; }
 	.catalog-search select { max-width: 9rem; }
 	.catalog-pager { display: flex; gap: .5rem; }
+	.circulation { display: flex; gap: 2rem; align-items: baseline; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+	.circulation-value { font-size: 1.5rem; font-weight: 600; }
 </style>
 {% endblock %}
 
@@ -76,6 +83,23 @@
 		pager.hidden = total <= PAGE_LENGTH;
 		status.textContent = total ? `${total} books, page ${page} of ${Math.ceil(total / PAGE_LENGTH)}` : "No books found";
 	}
+
+	const SUMMARY_INTERVAL_MS = 15000;
+	const circulation = document.getElementById("circulation");
+
+	async function refreshSummary() {
+		const response = await fetch("/api/method/mylibrary.api.get_circulation_summary");
+		if (!response.ok) return;
+		const { message } = await response.json();
+		circulation.querySelectorAll("[data-key]").forEach((node) => {
+			node.textContent = message[node.dataset.key];
+		});
+		const names = message.top_overdue.map((row) => `${row.member_name || row.member} (${row.overdue})`);
+		circulation.querySelector(".circulation-members").textContent = names.length ? `Most overdue: ${names.join(", ")}` : "";
+	}
+
+	refreshSummary();
+	setInterval(refreshSummary, SUMMARY_INTERVAL_MS);
 
 	form.addEventListener("submit", (event) => {
 		event.preventDefault();

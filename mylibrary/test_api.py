@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests import IntegrationTestCase
 
-from mylibrary.api import search_books
+from mylibrary.api import get_circulation_summary, search_books
 from mylibrary.library.doctype.book.test_book import make_book
 
 
@@ -23,3 +23,7 @@ class TestSearchBooks(IntegrationTestCase):
 
 	def test_page_length_is_bounded(self):
 		self.assertLessEqual(len(search_books("9", search_by="isbn", page_length=1000)["results"]), 100)
+
+	def test_circulation_summary_shape(self):
+		summary = get_circulation_summary()
+		self.assertEqual(set(summary), {"on_loan", "overdue", "top_overdue"})
