@@ -6,3 +6,6 @@ app_email = "library@example.test"
 app_license = "mit"
 
 before_install = "mylibrary.install.before_install"
+
+after_request = ["mylibrary.audit.log_request"]
+after_job = ["mylibrary.audit.log_job"]
