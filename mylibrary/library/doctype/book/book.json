@@ -10,7 +10,9 @@
   "column_break_kq3f",
   "isbn",
   "total_copies",
-  "available_copies"
+  "available_copies",
+  "section_break_summary",
+  "description"
  ],
  "fields": [
   {
@@ -59,11 +61,20 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_summary",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Summary"
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-02 10:14:22.418395",
+ "modified": "2026-11-12 12:40:09.551203",
  "modified_by": "Administrator",
  "module": "Library",
  "name": "Book",
