@@ -53,17 +53,10 @@ def get_circulation_summary() -> dict:
 	)[0]
 	top_overdue = frappe.db.sql(
 		"""
-		select member, member_name, overdue from (
-			select r.member, r.member_name, (
-				select count(*) from `tabBook Register` o
-				where o.member = r.member and o.docstatus = 1
-					and o.returned_on is null and o.due_date < %(today)s
-			) as overdue
-			from `tabBook Register` r
-			where r.docstatus = 1 and r.returned_on is null
-		) loans
-		where overdue > 0
-		group by member, member_name, overdue
+		select member, member_name, count(*) as overdue
+		from `tabBook Register`
+		where docstatus = 1 and returned_on is null and due_date < %(today)s
+		group by member, member_name
 		order by overdue desc, member_name
 		limit 5
 		""",
