@@ -18,7 +18,7 @@
 	</form>
 	<p id="catalog-status" class="text-muted"></p>
 	<table class="table" id="catalog-results" hidden>
-		<thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th></tr></thead>
+		<thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th><th>Due back</th></tr></thead>
 		<tbody></tbody>
 	</table>
 	<div class="catalog-pager" hidden>
@@ -75,7 +75,7 @@
 			title.textContent = book.title;
 			const titleCell = document.createElement("td");
 			titleCell.append(title);
-			tr.append(titleCell, cell(book.author), cell(book.isbn), cell(`${book.available_copies} / ${book.total_copies}`));
+			tr.append(titleCell, cell(book.author), cell(book.isbn), cell(`${book.available_copies} / ${book.total_copies}`), cell(book.available_copies ? "" : book.due_back || ""));
 			return tr;
 		});
 		table.tBodies[0].replaceChildren(...rows);

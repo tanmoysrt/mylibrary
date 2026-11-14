@@ -27,3 +27,7 @@ class TestSearchBooks(IntegrationTestCase):
 	def test_circulation_summary_shape(self):
 		summary = get_circulation_summary()
 		self.assertEqual(set(summary), {"on_loan", "overdue", "top_overdue"})
+
+	def test_due_back_shows_earliest_open_loan(self):
+		result = search_books("9780201633610", search_by="isbn")
+		self.assertIn("due_back", result["results"][0])

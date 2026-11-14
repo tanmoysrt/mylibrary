@@ -18,6 +18,13 @@ def search_books(query: str, search_by: str = "author", page: int = 1, page_leng
 	names = frappe.get_all("Book", filters={field: ["like", f"%{query}%"]}, pluck="name", limit_page_length=0)
 	books = [frappe.get_doc("Book", name) for name in names]
 	books.sort(key=lambda book: (book.author.lower(), book.title.lower()))
+	for book in books:
+		book.due_back = frappe.db.get_value(
+			"Book Register",
+			{"book": book.name, "docstatus": 1, "returned_on": ("is", "not set")},
+			"due_date",
+			order_by="due_date asc",
+		)
 
 	start = (page - 1) * page_length
 	return {
@@ -30,6 +37,7 @@ def search_books(query: str, search_by: str = "author", page: int = 1, page_leng
 				"isbn": book.isbn,
 				"available_copies": book.available_copies,
 				"total_copies": book.total_copies,
+				"due_back": book.due_back,
 			}
 			for book in books[start : start + page_length]
 		],
