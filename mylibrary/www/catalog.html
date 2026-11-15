@@ -2,40 +2,98 @@
 
 {% block page_content %}
 <div class="catalog">
-	<h1>Catalog</h1>
-	<div class="circulation" id="circulation">
-		<div><span class="circulation-value" data-key="on_loan">–</span> on loan</div>
-		<div><span class="circulation-value" data-key="overdue">–</span> overdue</div>
-		<div class="circulation-members text-muted"></div>
+	<div class="catalog-head">
+		<h1>Catalog</h1>
+		<div class="catalog-stats">
+			<span><b data-key="on_loan">–</b> on loan</span>
+			<span class="overdue"><b data-key="overdue">–</b> overdue</span>
+		</div>
 	</div>
+
 	<form id="catalog-search" class="catalog-search">
-		<select name="search_by" class="form-control">
-			<option value="author">Author</option>
-			<option value="isbn">ISBN</option>
-		</select>
-		<input name="query" class="form-control" placeholder="Author name or ISBN" autocomplete="off" required>
-		<button type="submit" class="btn btn-primary">Search</button>
+		<label class="catalog-field">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+			<input name="query" placeholder="Author name" autocomplete="off" required>
+			<input type="hidden" name="search_by" value="author">
+			<span class="catalog-toggle">
+				<button type="button" data-value="author" class="active">Author</button>
+				<button type="button" data-value="isbn">ISBN</button>
+			</span>
+		</label>
+		<button type="submit" class="catalog-button">Search</button>
 	</form>
-	<p id="catalog-status" class="text-muted"></p>
-	<table class="table" id="catalog-results" hidden>
-		<thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th><th>Due back</th></tr></thead>
-		<tbody></tbody>
-	</table>
+
+	<p id="catalog-status" class="catalog-muted"></p>
+	<div id="catalog-empty" class="catalog-empty">
+		<b>Search the catalog</b>
+		<span>Enter an author name or an ISBN.</span>
+	</div>
+	<div id="catalog-results" class="catalog-box" hidden>
+		<table>
+			<thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th class="right">Availability</th></tr></thead>
+			<tbody></tbody>
+		</table>
+	</div>
 	<div class="catalog-pager" hidden>
-		<button type="button" class="btn btn-default" data-step="-1">Previous</button>
-		<button type="button" class="btn btn-default" data-step="1">Next</button>
+		<span class="catalog-muted" id="catalog-range"></span>
+		<span>
+			<button type="button" class="catalog-pager-button" data-step="-1">Previous</button>
+			<button type="button" class="catalog-pager-button" data-step="1">Next</button>
+		</span>
 	</div>
 </div>
 {% endblock %}
 
 {% block style %}
 <style>
-	.catalog { max-width: 960px; margin: 2rem auto; }
-	.catalog-search { display: flex; gap: .5rem; margin: 1rem 0; }
-	.catalog-search select { max-width: 9rem; }
-	.catalog-pager { display: flex; gap: .5rem; }
-	.circulation { display: flex; gap: 2rem; align-items: baseline; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
-	.circulation-value { font-size: 1.5rem; font-weight: 600; }
+	.catalog { max-width: 960px; margin: 24px auto 40px; padding: 0 20px; font-size: 14px; color: #383838; }
+	.catalog h1 { font-size: 20px; font-weight: 600; color: #171717; margin: 0; }
+	.catalog-muted { color: #7c7c7c; font-size: 13px; }
+	.catalog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+	.catalog-stats { display: flex; gap: 16px; font-size: 13px; color: #7c7c7c; font-variant-numeric: tabular-nums; }
+	.catalog-stats b { color: #171717; font-weight: 600; }
+	.catalog-stats .overdue b { color: #cc2929; }
+
+	.catalog-search { display: flex; gap: 8px; margin: 16px 0 12px; }
+	.catalog-field { flex: 1; display: flex; align-items: center; gap: 6px; height: 32px; margin: 0; padding: 0 3px 0 10px; background: #f3f3f3; border-radius: 8px; color: #7c7c7c; font-weight: normal; }
+	.catalog-field input { flex: 1; min-width: 0; border: 0; background: transparent; color: #383838; outline: none; }
+	.catalog-toggle { display: flex; gap: 2px; padding: 2px; background: #ededed; border-radius: 6px; }
+	.catalog-toggle button { height: 22px; padding: 0 8px; border: 0; border-radius: 4px; background: transparent; color: #7c7c7c; font-size: 13px; }
+	.catalog-toggle button.active { background: #fff; color: #171717; font-weight: 500; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+	.catalog-button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #171717; color: #fff; font-weight: 500; }
+
+	.catalog-box { border: 1px solid #ededed; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+	.catalog-box table { width: 100%; margin: 0; border-collapse: collapse; }
+	.catalog-box th { padding: 6px 12px; background: #f8f8f8; border-bottom: 1px solid #ededed; color: #7c7c7c; font-size: 13px; font-weight: 500; }
+	.catalog-box td { padding: 9px 12px; border-bottom: 1px solid #ededed; }
+	.catalog-box tr:last-child td { border-bottom: 0; }
+	.catalog-box tbody tr:hover { background: #f8f8f8; }
+	.catalog-box td a { color: #383838; font-weight: 500; }
+	.catalog-box .isbn { color: #7c7c7c; font-size: 13px; }
+	.catalog-box .right { text-align: right; }
+
+	.pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+	.pill::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+	.pill.green { background: #e4fae6; color: #278f5e; }
+	.pill.amber { background: #fff7d3; color: #b0640c; }
+	.pill.red { background: #fff0f0; color: #cc2929; }
+
+	.catalog-empty { padding: 48px 16px; text-align: center; color: #7c7c7c; font-size: 13px; }
+	.catalog-empty b { display: block; color: #383838; font-size: 14px; font-weight: 500; }
+	.catalog-pager { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+	.catalog-pager-button { height: 28px; padding: 0 10px; border: 0; border-radius: 8px; background: #f3f3f3; font-size: 13px; font-weight: 500; }
+	.catalog-pager-button:disabled { color: #999; }
+
+	@media (max-width: 640px) {
+		.catalog { padding: 0 16px; }
+		.catalog-search { flex-wrap: wrap; }
+		.catalog-field, .catalog-button { height: 40px; }
+		.catalog-button { width: 100%; }
+		.catalog-box thead { display: none; }
+		.catalog-box tr { display: grid; grid-template-columns: 1fr auto; padding: 10px 12px; border-bottom: 1px solid #ededed; }
+		.catalog-box td { display: block; padding: 0; border: 0; }
+		.catalog-box td.right { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+	}
 </style>
 {% endblock %}
 
@@ -45,16 +103,44 @@
 	const PAGE_LENGTH = 20;
 	const form = document.getElementById("catalog-search");
 	const status = document.getElementById("catalog-status");
-	const table = document.getElementById("catalog-results");
+	const empty = document.getElementById("catalog-empty");
+	const results = document.getElementById("catalog-results");
 	const pager = document.querySelector(".catalog-pager");
 	let page = 1;
 	let total = 0;
 
-	const cell = (text) => {
+	function cell(text, className = "") {
 		const td = document.createElement("td");
 		td.textContent = text;
+		td.className = className;
 		return td;
-	};
+	}
+
+	function availability(book) {
+		const pill = document.createElement("span");
+		if (!book.available_copies) {
+			const due = book.due_back ? ` · due ${new Date(book.due_back).toLocaleDateString(undefined, { day: "numeric", month: "short" })}` : "";
+			pill.className = "pill red";
+			pill.textContent = `Out${due}`;
+		} else {
+			pill.className = book.available_copies < book.total_copies / 2 ? "pill amber" : "pill green";
+			pill.textContent = `${book.available_copies} of ${book.total_copies}`;
+		}
+		const td = cell("", "right");
+		td.append(pill);
+		return td;
+	}
+
+	function bookRow(book) {
+		const link = document.createElement("a");
+		link.href = `/app/book/${encodeURIComponent(book.name)}`;
+		link.textContent = book.title;
+		const title = cell("");
+		title.append(link);
+		const row = document.createElement("tr");
+		row.append(title, cell(book.author), cell(book.isbn, "isbn"), availability(book));
+		return row;
+	}
 
 	async function search() {
 		const params = new URLSearchParams(new FormData(form));
@@ -68,39 +154,33 @@
 		}
 		const { message } = await response.json();
 		total = message.total;
-		const rows = message.results.map((book) => {
-			const tr = document.createElement("tr");
-			const title = document.createElement("a");
-			title.href = `/app/book/${encodeURIComponent(book.name)}`;
-			title.textContent = book.title;
-			const titleCell = document.createElement("td");
-			titleCell.append(title);
-			tr.append(titleCell, cell(book.author), cell(book.isbn), cell(`${book.available_copies} / ${book.total_copies}`), cell(book.available_copies ? "" : book.due_back || ""));
-			return tr;
-		});
-		table.tBodies[0].replaceChildren(...rows);
-		table.hidden = rows.length === 0;
+		results.querySelector("tbody").replaceChildren(...message.results.map(bookRow));
+		results.hidden = total === 0;
 		pager.hidden = total <= PAGE_LENGTH;
-		status.textContent = total ? `${total} books, page ${page} of ${Math.ceil(total / PAGE_LENGTH)}` : "No books found";
+		empty.hidden = true;
+		status.textContent = total ? "" : "No books found";
+		const first = (page - 1) * PAGE_LENGTH + 1;
+		document.getElementById("catalog-range").textContent = `${first}–${first + message.results.length - 1} of ${total}`;
+		pager.querySelector('[data-step="-1"]').disabled = page === 1;
+		pager.querySelector('[data-step="1"]').disabled = page * PAGE_LENGTH >= total;
 	}
-
-	const SUMMARY_INTERVAL_MS = 15000;
-	const circulation = document.getElementById("circulation");
 
 	async function refreshSummary() {
 		const response = await fetch("/api/method/mylibrary.api.get_circulation_summary");
 		if (!response.ok) return;
 		const { message } = await response.json();
-		circulation.querySelectorAll("[data-key]").forEach((node) => {
-			node.textContent = message[node.dataset.key];
+		document.querySelectorAll(".catalog-stats [data-key]").forEach((node) => {
+			node.textContent = message[node.dataset.key].toLocaleString();
 		});
-		const names = message.top_overdue.map((row) => `${row.member_name || row.member} (${row.overdue})`);
-		circulation.querySelector(".circulation-members").textContent = names.length ? `Most overdue: ${names.join(", ")}` : "";
 	}
 
-	refreshSummary();
-	setInterval(refreshSummary, SUMMARY_INTERVAL_MS);
-
+	form.querySelectorAll(".catalog-toggle button").forEach((button) => {
+		button.addEventListener("click", () => {
+			form.querySelectorAll(".catalog-toggle button").forEach((other) => other.classList.toggle("active", other === button));
+			form.search_by.value = button.dataset.value;
+			form.query.placeholder = button.dataset.value === "isbn" ? "ISBN" : "Author name";
+		});
+	});
 	form.addEventListener("submit", (event) => {
 		event.preventDefault();
 		page = 1;
@@ -108,11 +188,13 @@
 	});
 	pager.addEventListener("click", (event) => {
 		const step = Number(event.target.dataset.step || 0);
-		const next = page + step;
-		if (!step || next < 1 || (next - 1) * PAGE_LENGTH >= total) return;
-		page = next;
+		if (!step) return;
+		page += step;
 		search();
 	});
+
+	refreshSummary();
+	setInterval(refreshSummary, 15000);
 })();
 </script>
 {% endblock %}
